@@ -1,0 +1,1 @@
+ALTER TABLE "tracking_events" ADD COLUMN "is_bootstrap" boolean DEFAULT false NOT NULL;

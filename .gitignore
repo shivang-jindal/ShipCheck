@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.data/
+.env
+.env.local
+.env.*.local
+*.log
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db
