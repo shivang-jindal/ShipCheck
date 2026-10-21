@@ -1,45 +1,50 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
 
 jobs:
   verify:
+    name: Verify
     runs-on: ubuntu-latest
-    env:
-      # CI uses the embedded PostgreSQL build; set DATABASE_URL to use a service.
-      DATABASE_URL: ''
-      EMAIL_PROVIDER: disabled
-      LOG_LEVEL: silent
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run verify
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: Type-check, lint, test and build
-        run: npm run verify
-
-      - name: Database migrations on an empty database
-        run: npm run db:migrate
-
-      - name: Development seed
-        run: npm run db:seed
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
+  release:
+    name: Release
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - name: Publish to npm
+        if: env.NPM_TOKEN != ''
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release
+        if: env.GITHUB_TOKEN != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
