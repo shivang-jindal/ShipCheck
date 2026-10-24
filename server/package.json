@@ -26,7 +26,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "nodemailer": "^6.10.0",
-    "pdfkit": "^0.15.2",
+    "pdfkit": "^0.20.2",
     "pg": "^8.13.1",
     "pino": "^9.6.0",
     "zod": "^3.24.1"
