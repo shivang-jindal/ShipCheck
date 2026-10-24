@@ -3,8 +3,21 @@ name: CI
 on:
   push:
     branches: [main, develop]
+    # Documentation-only commits do not need a full verify run. Keeping them out
+    # of CI avoids a burst of red checks (and failure notifications) for changes
+    # that cannot affect the build.
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - '.editorconfig'
+      - '.gitattributes'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - '.editorconfig'
+      - '.gitattributes'
 
 env:
   NODE_VERSION: '20'
