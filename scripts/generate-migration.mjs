@@ -22,6 +22,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 const serverDir = join(repoRoot, 'server');
 const outputDir = join(serverDir, 'drizzle');
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true });
 
@@ -40,7 +41,7 @@ try {
   // node_modules is not enough when that path contains a space. Install the two
   // generator packages locally instead (npm cache keeps this fast).
   const install = spawnSync(
-    'npm.cmd',
+    npm,
     ['install', '--no-audit', '--no-fund', 'drizzle-orm@0.45.4', 'drizzle-kit@0.31.11', 'zod@^3.24.1'],
     { cwd: workDir, stdio: 'inherit', shell: true },
   );
