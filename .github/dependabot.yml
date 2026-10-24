@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automated"
+    groups:
+      dev-deps:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier*"
+          - "vitest*"
+          - "@vitest/*"
+      prod-deps:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier*"
+          - "vitest*"
+          - "@vitest/*"
+    ignore:
+      # The runtime stack is intentionally pinned (React 18, Vite 6, Express 4,
+      # Zod 3). Major upgrades are evaluated by hand so CI stays green.
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"

@@ -2,8 +2,30 @@
   "name": "shipcheck",
   "version": "1.0.0",
   "private": true,
-  "description": "ShipCheck - invoice and payment collection workflow for small businesses.",
-  "license": "SEE LICENSE IN LICENSE",
+  "description": "ShipCheck - shipment tracking & exception management with carrier-agnostic REST adapter, webhook ingest, public tracking pages, and CSV import.",
+  "license": "MIT",
+  "homepage": "https://github.com/shivang-jindal/ShipCheck#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivang-jindal/ShipCheck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shivang-jindal/ShipCheck/issues"
+  },
+  "keywords": [
+    "shipment",
+    "tracking",
+    "logistics",
+    "carrier",
+    "webhook",
+    "csv-import",
+    "public-tracking",
+    "saas",
+    "react",
+    "express",
+    "drizzle",
+    "typescript"
+  ],
   "engines": {
     "node": ">=20.11"
   },

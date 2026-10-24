@@ -1,0 +1,38 @@
+name: Bug Report
+description: Report a bug
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reporting! Please fill out the sections below."
+  - type: input
+    id: version
+    attributes:
+      label: Version/Commit
+      placeholder: "e.g. v1.2.3 or commit SHA"
+    required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      placeholder: "1. Go to...\n2. Click...\n3. See error..."
+    required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: "What should happen?"
+    required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: "What actually happens?"
+    required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Stack Traces
+      render: shell
+    required: false
