@@ -11,6 +11,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 const steps = [
   ['Shared type-check + build', 'run', 'build:shared'],
@@ -25,7 +26,7 @@ let failed = 0;
 
 for (const [label, ...command] of steps) {
   process.stdout.write(`\n=== ${label} ===\n`);
-  const result = spawnSync('npm.cmd', command, { cwd: root, stdio: 'inherit', shell: true });
+  const result = spawnSync(npm, command, { cwd: root, stdio: 'inherit', shell: true });
   if (result.status !== 0) {
     failed += 1;
     process.stdout.write(`--- FAILED: ${label}\n`);
