@@ -126,7 +126,7 @@ export function AppRouter() {
         <Route path="/track/:token" element={<PublicTrackingPage />} />
         <Route path="/dashboard" element={<RequireSession><RedirectToFirstOrganization /></RequireSession>} />
         <Route
-          path="/:organizationId"
+          path="/:organizationId/*"
           element={
             <RequireSession>
               <RequireOrganization>
