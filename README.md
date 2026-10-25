@@ -36,8 +36,7 @@ Configure `.env` (copy `.env.example`):
 ```env
 DATABASE_URL="postgresql://..."  # or omit for PGlite
 ENCRYPTION_KEY="64-char-hex-key"
-SESSION_SECRET="random-string"
-EMAIL_PROVIDER="smtp|disabled|log"
+EMAIL_PROVIDER=disabled  # smtp | disabled | log
 ```
 
 ---
@@ -65,10 +64,33 @@ All settings via environment variables (see `.env.example`):
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DATABASE_URL` | No | PostgreSQL URL (omit for PGlite) |
-| `ENCRYPTION_KEY` | Yes | 64-char hex (32 bytes) |
-| `SESSION_SECRET` | Yes | Random string |
-| `EMAIL_PROVIDER` | Yes | `smtp` \| `disabled` \| `log` |
+| `DATABASE_URL` | No | PostgreSQL URL (omit for embedded PGlite) |
+| `ENCRYPTION_KEY` | For integrations | 64-char hex (32 bytes) used to encrypt stored credentials |
+| `EMAIL_PROVIDER` | No | `smtp` \| `disabled` \| `log` (default `disabled`) |
+| `FIREBASE_PROJECT_ID` | For Google sign-in | Firebase project id used to verify Google ID tokens |
+| `VITE_FIREBASE_*` | For Google sign-in | Public Firebase web config read by the browser |
+
+### Google sign-in
+
+Google sign-in uses Firebase Authentication in the browser and verifies the
+resulting ID token on the server against Google's published keys. No service
+account or client secret is stored.
+
+1. In the Firebase console, create a project and enable **Authentication -> Sign-in method -> Google**.
+2. Add a web app, then put its public configuration in the repository `.env` (one root file, read by both the client and the server):
+
+   ```bash
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-project
+   VITE_FIREBASE_APP_ID=...
+   FIREBASE_PROJECT_ID=your-project
+   ```
+
+3. Add `http://localhost:5173` and your production origin to **Authentication -> Settings -> Authorized domains**.
+
+With no Firebase values the button is rendered disabled with a clear note, and the
+API refuses Google sign-in; email and password sign-in keeps working.
 
 ---
 
@@ -79,7 +101,7 @@ All settings via environment variables (see `.env.example`):
 | `npm run dev` | Start dev servers (client + server) |
 | `npm run build` | Production build |
 | `npm run verify` | Typecheck + Lint + Test + Build |
-| `npm test` | Unit/integration tests (39 passing) |
+| `npm test` | Unit/integration tests (48 passing) |
 | `npm run db:generate` | Generate Drizzle migrations |
 | `npm run db:migrate` | Run migrations |
 

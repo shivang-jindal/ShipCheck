@@ -6,6 +6,8 @@
  * production credential.
  */
 
+import './load-env.js';
+
 import { z } from 'zod';
 
 const booleanish = z
@@ -50,6 +52,13 @@ const envSchema = z.object({
    */
   ENCRYPTION_KEY: optionalString,
 
+  /**
+   * Firebase project id used to verify Google sign-in ID tokens. Optional: with
+   * no value the Google button renders disabled and the endpoint refuses work.
+   * This is an identifier, not a secret.
+   */
+  FIREBASE_PROJECT_ID: optionalString,
+
   /** Background worker. */
   WORKER_ENABLED: booleanish.default(true),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(200).max(60_000).default(2_000),
@@ -91,6 +100,10 @@ export interface AppConfig {
     deliversMessages: boolean;
   };
   encryptionKey: Buffer | null;
+  firebase: {
+    /** Null when Google sign-in is not configured. */
+    projectId: string | null;
+  };
   worker: {
     enabled: boolean;
     pollIntervalMs: number;
@@ -147,6 +160,12 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     warnings.push('COOKIE_SECURE should stay enabled in production.');
   }
 
+  if (!env.FIREBASE_PROJECT_ID) {
+    warnings.push(
+      'FIREBASE_PROJECT_ID is not set: Google sign-in is disabled. Existing sign-in methods still work.',
+    );
+  }
+
   const cookieSecure = env.COOKIE_SECURE ?? env.NODE_ENV === 'production';
 
   return {
@@ -171,6 +190,9 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
       deliversMessages: env.EMAIL_PROVIDER === 'smtp',
     },
     encryptionKey,
+    firebase: {
+      projectId: env.FIREBASE_PROJECT_ID ?? null,
+    },
     worker: {
       enabled: env.WORKER_ENABLED,
       pollIntervalMs: env.WORKER_POLL_INTERVAL_MS,

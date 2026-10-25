@@ -5,6 +5,8 @@ import { defineConfig } from 'vite';
 const API_TARGET = process.env.VITE_API_PROXY ?? 'http://localhost:4000';
 
 export default defineConfig({
+  // One .env at the repository root configures the server and the client.
+  envDir: '..',
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,

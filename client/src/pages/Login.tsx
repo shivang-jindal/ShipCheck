@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { loginSchema, type AuthSessionResponse } from '@shipcheck/shared';
 
 import { Button, Field, Input } from '../components/ui';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import { api, ApiError } from '../lib/api';
 import { useSession } from '../lib/session';
 import { AuthLayout, FormError } from './AuthLayout';
@@ -16,6 +17,13 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+  async function completeSignIn(session: AuthSessionResponse) {
+    queryClient.clear();
+    await refresh();
+    const first = session.memberships[0];
+    navigate(first ? `/${first.organizationId}/dashboard` : '/welcome', { replace: true });
+  }
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -31,12 +39,7 @@ export function LoginPage() {
       }
       return api.post<AuthSessionResponse>('/auth/login', parsed.data);
     },
-    onSuccess: async (session) => {
-      queryClient.clear();
-      await refresh();
-      const first = session.memberships[0];
-      navigate(first ? `/${first.organizationId}/dashboard` : '/welcome', { replace: true });
-    },
+    onSuccess: completeSignIn,
   });
 
   return (
@@ -99,6 +102,8 @@ export function LoginPage() {
           Forgot your password?
         </Link>
       </form>
+
+      <GoogleSignInButton onSignedIn={completeSignIn} />
     </AuthLayout>
   );
 }

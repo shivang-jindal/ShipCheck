@@ -1,4 +1,5 @@
-import { Router, type CookieOptions, type Response } from 'express';
+import { Router, type CookieOptions, type RequestHandler, type Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 
 import {
@@ -18,8 +19,36 @@ import { validate } from '../validate.js';
 
 const organizationSwitchParams = z.object({ organizationId: z.string().uuid() });
 
+/** A Firebase ID token is a JWT; bound the size before any parsing. */
+const googleSignInSchema = z.object({
+  idToken: z.string().trim().min(20).max(10_000),
+});
+
 export function authRouter(services: Services): Router {
   const router = Router();
+
+  /**
+   * Credential endpoints get a much tighter budget than the global limiter:
+   * these are the only routes where an attacker can guess a secret. Successful
+   * requests are not counted, so a legitimate user who signs in repeatedly is
+   * never locked out, while a run of failures is.
+   */
+  const credentialLimit = rateLimit({
+    windowMs: services.config.rateLimit.windowMs,
+    limit: services.config.rateLimit.authMax,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    handler: (_req, res) => {
+      res.status(429).json({
+        error: {
+          code: 'RATE_LIMITED',
+          message: 'Too many failed attempts. Please wait a minute and try again.',
+        },
+      });
+    },
+  });
+  const credentialLimiter: RequestHandler = credentialLimit;
 
   function setSessionCookie(res: Response, token: string, expiresAt: Date): void {
     const options: CookieOptions = {
@@ -34,6 +63,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/register',
+    credentialLimiter,
     validate({ body: registerSchema }),
     asyncHandler(async (req, res) => {
       const { user, session } = await services.auth.register({
@@ -48,10 +78,26 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/login',
+    credentialLimiter,
     validate({ body: loginSchema }),
     asyncHandler(async (req, res) => {
       const { user, session } = await services.auth.signIn({
         ...(req.body as { email: string; password: string }),
+        meta: { ipAddress: req.clientIp, userAgent: req.userAgent },
+      });
+      setSessionCookie(res, session.token, session.expiresAt);
+      const payload = await services.auth.sessionPayload(user.id, null);
+      res.json(payload);
+    }),
+  );
+
+  router.post(
+    '/google',
+    credentialLimiter,
+    validate({ body: googleSignInSchema }),
+    asyncHandler(async (req, res) => {
+      const { user, session } = await services.auth.signInWithGoogle({
+        idToken: (req.body as { idToken: string }).idToken,
         meta: { ipAddress: req.clientIp, userAgent: req.userAgent },
       });
       setSessionCookie(res, session.token, session.expiresAt);
@@ -126,6 +172,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/password/forgot',
+    credentialLimiter,
     validate({ body: forgotPasswordSchema }),
     asyncHandler(async (req, res) => {
       const { email } = req.body as { email: string };
@@ -161,6 +208,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/password/reset',
+    credentialLimiter,
     validate({ body: resetPasswordSchema }),
     asyncHandler(async (req, res) => {
       const { token, password } = req.body as { token: string; password: string };

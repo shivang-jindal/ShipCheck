@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { registerSchema, type AuthSessionResponse } from '@shipcheck/shared';
 
 import { Button, Field, Input } from '../components/ui';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import { api, ApiError } from '../lib/api';
 import { useSession } from '../lib/session';
 import { AuthLayout, FormError } from './AuthLayout';
@@ -14,6 +15,13 @@ export function RegisterPage() {
   const { refresh } = useSession();
   const [form, setForm] = useState({ displayName: '', email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+  async function completeSignIn(session: AuthSessionResponse) {
+    await refresh();
+    const first = session.memberships[0];
+    // A brand-new account has no workspace yet; an existing Google account may.
+    navigate(first ? `/${first.organizationId}/dashboard` : '/welcome', { replace: true });
+  }
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -29,10 +37,7 @@ export function RegisterPage() {
       }
       return api.post<AuthSessionResponse>('/auth/register', parsed.data);
     },
-    onSuccess: async () => {
-      await refresh();
-      navigate('/welcome', { replace: true });
-    },
+    onSuccess: completeSignIn,
   });
 
   return (
@@ -109,6 +114,8 @@ export function RegisterPage() {
           Create account
         </Button>
       </form>
+
+      <GoogleSignInButton onSignedIn={completeSignIn} />
     </AuthLayout>
   );
 }
