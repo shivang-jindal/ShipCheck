@@ -89,6 +89,9 @@ account or client secret is stored.
 
 3. Add `http://localhost:5173` and your production origin to **Authentication -> Settings -> Authorized domains**.
 
+Vite reads these values at build time: restart the dev server or rebuild the
+client after changing them.
+
 With no Firebase values the button is rendered disabled with a clear note, and the
 API refuses Google sign-in; email and password sign-in keeps working.
 
