@@ -20,7 +20,7 @@ export function AuthLayout({
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-600 text-sm font-bold text-white">
-            C
+            S
           </span>
           <span className="text-base font-semibold text-ink">ShipCheck</span>
         </div>

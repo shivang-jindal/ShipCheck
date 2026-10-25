@@ -169,7 +169,7 @@ function Brand({ organizationName }: { organizationName: string }) {
   return (
     <div className="flex items-center gap-2 px-4 py-4">
       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-600 text-[13px] font-bold text-white">
-        C
+        S
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-ink">ShipCheck</span>

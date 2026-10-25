@@ -42,7 +42,7 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Sign in to ShipCheck"
-      description="Invoice, track payments and follow up on overdue balances."
+      description="Track every shipment from label to delivery, and resolve exceptions before they reach the customer."
       footer={
         <>
           No account yet?{' '}
