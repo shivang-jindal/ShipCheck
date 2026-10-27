@@ -11,14 +11,11 @@ import { CreateOrganizationPage } from './pages/CreateOrganization';
 import { DashboardPage } from './pages/Dashboard';
 import { ExceptionDetailPage } from './pages/ExceptionDetail';
 import { ExceptionsPage } from './pages/Exceptions';
-import { ForgotPasswordPage } from './pages/ForgotPassword';
 import { ImportsPage } from './pages/Imports';
 import { LoginPage } from './pages/Login';
 import { NotFoundPage } from './pages/NotFound';
 import { NotificationsPage } from './pages/Notifications';
 import { PublicTrackingPage } from './pages/PublicTracking';
-import { RegisterPage } from './pages/Register';
-import { ResetPasswordPage } from './pages/ResetPassword';
 import { SettingsPage } from './pages/Settings';
 import { ShipmentCreatePage } from './pages/ShipmentCreate';
 import { ShipmentDetailPage } from './pages/ShipmentDetail';
@@ -118,9 +115,9 @@ export function AppRouter() {
     <SessionProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/register" element={<Navigate to="/login" replace />} />
+        <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/login" replace />} />
         <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
         <Route path="/welcome" element={<RequireSession><CreateOrganizationPage /></RequireSession>} />
         <Route path="/track/:token" element={<PublicTrackingPage />} />

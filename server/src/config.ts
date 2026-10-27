@@ -162,7 +162,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
 
   if (!env.FIREBASE_PROJECT_ID) {
     warnings.push(
-      'FIREBASE_PROJECT_ID is not set: Google sign-in is disabled. Existing sign-in methods still work.',
+      'FIREBASE_PROJECT_ID is not set: Google sign-in is disabled, and the web app has no other sign-in method.',
     );
   }
 

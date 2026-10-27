@@ -27,7 +27,9 @@ Routes reachable without a session:
 | --- | --- |
 | `GET /api/v1/health/*` | Orchestrator probes; skipped by the rate limiter |
 | `GET /api/v1/public/tracking/:token` | Customer-facing tracking link, token-scoped |
-| `POST /api/v1/auth/register`, `/login`, `/password/forgot`, `/password/reset`, `/logout` | Registration and sign-in |
+| `POST /api/v1/auth/google` | Google sign-in; the only sign-in method in the web app |
+| `POST /api/v1/auth/register`, `/login`, `/password/*` | Development and tests only; return `404` in production |
+| `POST /api/v1/auth/logout` | Ends the current session |
 | `POST /api/v1/auth/organizations/:id/switch`, `/accept-invitation`, `GET /auth/organizations`, `POST /auth/organizations`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/password/change` | These require a session and return `401` without one |
 
 There is **no webhook route**. Nothing in ShipCheck accepts an inbound carrier
@@ -178,23 +180,46 @@ the email adapter name with `deliversMessages` and its `setupHint`, and the same
 
 ## 3. Authentication — `/api/v1/auth`
 
-| Method | Path | Auth |
-| --- | --- | --- |
-| `POST` | `/auth/register` | – | – |
-| `POST` | `/auth/login` | – | – |
+| Method | Path | Auth | Permission |
+| --- | --- | --- | --- |
+| `POST` | `/auth/google` | – | – |
+| `POST` | `/auth/register` | – | Development only |
+| `POST` | `/auth/login` | – | Development only |
 | `POST` | `/auth/logout` | – | – |
 | `GET` | `/auth/session` | – | – |
 | `GET` | `/auth/me` | session | any member |
 | `PATCH` | `/auth/me` | session | any member |
-| `POST` | `/auth/password/change` | session | any member |
-| `POST` | `/auth/password/forgot` | – | – |
-| `POST` | `/auth/password/reset` | – | – |
+| `POST` | `/auth/password/change` | session | Development only |
+| `POST` | `/auth/password/forgot` | – | Development only |
+| `POST` | `/auth/password/reset` | – | Development only |
 | `GET` | `/auth/organizations` | session | any member |
 | `POST` | `/auth/organizations` | session | any member |
 | `POST` | `/auth/organizations/:organizationId/switch` | session | membership required |
 | `POST` | `/auth/accept-invitation` | session | – |
 
-### `POST /auth/register` → `201`
+### `POST /auth/google` → `200`
+
+The only sign-in method in the web app. The browser completes the Google popup
+with Firebase and sends the resulting ID token:
+
+| Field | Type | Rules |
+| --- | --- | --- |
+| `idToken` | string | A Firebase ID token for the configured project |
+
+The server verifies the RS256 signature against Google's published keys, the
+issuer and audience, `firebase.sign_in_provider === "google.com"` and
+`email_verified === true`. Accounts are matched by the verified email; a new
+account is created with no password hash. Returns `AuthSessionResponse` and sets
+the session cookie.
+
+Errors: `401 UNAUTHENTICATED` (invalid token), `503 INTEGRATION_UNAVAILABLE`
+(`FIREBASE_PROJECT_ID` not configured), `429 RATE_LIMITED`.
+
+`/auth/register`, `/auth/login` and the `/auth/password/*` routes below are
+development-only. They exist for the seed, the smoke script and the automated
+tests, and return `404 NOT_FOUND` when `NODE_ENV=production`.
+
+### `POST /auth/register` → `201` (development only)
 
 | Field | Type | Rules |
 | --- | --- | --- |
@@ -217,7 +242,7 @@ the new user to `/welcome`.
 
 Errors: `400 VALIDATION_ERROR`, `409 CONFLICT` (email taken).
 
-### `POST /auth/login` → `200`
+### `POST /auth/login` → `200` (development only)
 
 Request `{ "email": string, "password": string }`. Returns
 `AuthSessionResponse` and sets the cookie. `401 UNAUTHENTICATED` with **the same
@@ -242,14 +267,14 @@ organization if the user is still a member, otherwise the first membership, or
 
 Request `{ "displayName"?: string }` (1–120 characters).
 
-### `POST /auth/password/change` → `204`
+### `POST /auth/password/change` → `204` (development only)
 
 Request `{ "currentPassword": string, "newPassword": string }`. On success **all**
 sessions for the user are revoked and the cookie is cleared, so every device
 must sign in again. `400` if the current password is wrong; `422` if the new
 password equals the current one.
 
-### `POST /auth/password/forgot` → `200`
+### `POST /auth/password/forgot` → `200` (development only)
 
 Request `{ "email": string }`.
 
@@ -266,7 +291,7 @@ The response is identical whether or not the account exists. The token is
 minutes**. `resetEmailAvailable` is `false` when no working provider is
 configured; with `EMAIL_PROVIDER=log` the link is in `server/.data/outbox/`.
 
-### `POST /auth/password/reset` → `204`
+### `POST /auth/password/reset` → `204` (development only)
 
 Request `{ "token": string (20–400), "password": string }`. Consumes the token,
 rehashes the password and revokes all sessions. `400` if the token is invalid,

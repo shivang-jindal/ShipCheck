@@ -374,8 +374,9 @@ export function SettingsPage() {
 
       <Card className="mt-4" title="Your account">
         <p className="text-[13px] text-ink-muted">
-          Signed in as {useSessionEmail()}. ShipCheck uses a single sign-in; to change your
-          password, use the reset flow from the sign-in page.
+          Signed in as {useSessionEmail()}. ShipCheck uses Google as its only sign-in method, so
+          there is no password to change or reset. To use a different account, sign out and choose
+          it on the Google screen.
         </p>
         <Button className="mt-3" variant="secondary" onClick={() => void signOut()}>
           Sign out

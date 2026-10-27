@@ -13,6 +13,7 @@ import {
   updateProfileSchema,
 } from '@shipcheck/shared';
 
+import { notFound } from '../../errors.js';
 import type { Services } from '../../container.js';
 import { asyncHandler, requireAuthenticated } from '../middleware.js';
 import { validate } from '../validate.js';
@@ -50,6 +51,18 @@ export function authRouter(services: Services): Router {
   });
   const credentialLimiter: RequestHandler = credentialLimit;
 
+  /**
+   * Production is Google-only. Kept for development, tests, seeding and the
+   * smoke script, but in production these routes behave as if they do not exist.
+   */
+  const passwordEndpointsDisabled: RequestHandler = (_req, _res, next) => {
+    if (services.config.isProduction) {
+      next(notFound('Endpoint'));
+      return;
+    }
+    next();
+  };
+
   function setSessionCookie(res: Response, token: string, expiresAt: Date): void {
     const options: CookieOptions = {
       httpOnly: true,
@@ -63,6 +76,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/register',
+    passwordEndpointsDisabled,
     credentialLimiter,
     validate({ body: registerSchema }),
     asyncHandler(async (req, res) => {
@@ -78,6 +92,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/login',
+    passwordEndpointsDisabled,
     credentialLimiter,
     validate({ body: loginSchema }),
     asyncHandler(async (req, res) => {
@@ -156,6 +171,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/password/change',
+    passwordEndpointsDisabled,
     requireAuthenticated(),
     validate({ body: changePasswordSchema }),
     asyncHandler(async (req, res) => {
@@ -172,6 +188,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/password/forgot',
+    passwordEndpointsDisabled,
     credentialLimiter,
     validate({ body: forgotPasswordSchema }),
     asyncHandler(async (req, res) => {
@@ -208,6 +225,7 @@ export function authRouter(services: Services): Router {
 
   router.post(
     '/password/reset',
+    passwordEndpointsDisabled,
     credentialLimiter,
     validate({ body: resetPasswordSchema }),
     asyncHandler(async (req, res) => {

@@ -35,7 +35,7 @@ function GoogleMark() {
 }
 
 /**
- * "Continue with Google", placed under the password form.
+ * "Continue with Google", the only sign-in method.
  *
  * The button is visible even when the deployment has no Firebase config, so the
  * layout is complete; it is disabled with an honest explanation rather than
@@ -66,11 +66,6 @@ export function GoogleSignInButton({
 
   return (
     <div className="mt-5">
-      <div className="mb-4 flex items-center gap-3" aria-hidden="true">
-        <span className="h-px flex-1 bg-line" />
-        <span className="text-xs text-ink-subtle">or</span>
-        <span className="h-px flex-1 bg-line" />
-      </div>
 
       <Button
         type="button"

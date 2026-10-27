@@ -56,10 +56,14 @@ limitation.
   Zod schemas from `shared/` before it reaches domain code
   (`server/src/http/middleware.ts`). Domain functions receive typed values, never raw
   `req.body`.
-- **Accounts and sessions.** Registration and login use Argon2id password hashing. Session
-  tokens are 256-bit random values delivered in an HTTP-only, `SameSite` cookie; only the
-  SHA-256 hash of the token is stored. Logout, password change and password reset revoke
-  the affected sessions server-side.
+- **Accounts and sessions.** Google is the only sign-in method in the web app. The browser
+  obtains a Firebase ID token and the server verifies it against Google's published keys,
+  including the project issuer and audience, `sign_in_provider === "google.com"` and a
+  verified email. Accounts are matched by that verified email; a Google-created account has
+  no password hash and cannot be reached with a password. Session tokens are 256-bit random
+  values delivered in an HTTP-only, `SameSite` cookie; only the SHA-256 hash of the token is
+  stored. Logout revokes the session server-side. Password endpoints exist only for local
+  seeding and tests and return `404` when `NODE_ENV=production`.
 - **Tenancy.** Every tenant-owned row carries an organisation id, and each request
   re-checks membership. A record that belongs to another tenant answers `404`, never
   `403`, so the API cannot be used to probe for foreign identifiers.
@@ -80,7 +84,7 @@ limitation.
 ## Data handling
 
 ShipCheck stores shipments, events, and integration settings in a tenant-scoped database.
-Passwords are hashed with Argon2id; session tokens are stored only as a SHA-256 hash.
+Local passwords exist only for the development seed and automated tests (Argon2id); session tokens are stored only as a SHA-256 hash.
 Carrier and e-mail credentials are sealed with AES-256-GCM using `ENCRYPTION_KEY`.
 Public tracking pages expose only the fields needed to show a shipment's status.
 
