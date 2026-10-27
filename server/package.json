@@ -16,7 +16,7 @@
     "db:seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite": "^0.5.11",
     "@node-rs/argon2": "^2.0.2",
     "@shipcheck/shared": "1.0.0",
     "cookie-parser": "^1.4.7",
