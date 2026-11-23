@@ -16,7 +16,7 @@
     "db:seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.5.11",
+    "@electric-sql/pglite": "^0.5.17",
     "@node-rs/argon2": "^2.0.2",
     "@shipcheck/shared": "1.0.0",
     "cookie-parser": "^1.4.7",
@@ -25,9 +25,9 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
-    "jose": "^6.2.13",
+    "jose": "^6.2.18",
     "nodemailer": "^6.10.0",
-    "pdfkit": "^0.20.2",
+    "pdfkit": "^0.21.0",
     "pg": "^8.13.1",
     "pino": "^9.6.0",
     "zod": "^3.24.1"
@@ -40,9 +40,9 @@
     "@types/nodemailer": "^6.4.17",
     "@types/pdfkit": "^0.17.7",
     "@types/pg": "^8.11.10",
-    "@types/supertest": "^6.0.2",
+    "@types/supertest": "^7.2.1",
     "drizzle-kit": "^0.31.11",
-    "supertest": "^7.0.0",
+    "supertest": "^7.3.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
